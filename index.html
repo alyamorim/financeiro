@@ -207,6 +207,9 @@ select option{background:var(--surface2);}
   .origem-grid{grid-template-columns:1fr 1fr;}
 }
 
+.subtab-btn{padding:10px 16px;font-size:11px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;}
+.subtab-btn:hover{color:var(--text-muted);}
+.subtab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
 /* ── MÓDULO 2 ── */
 .m2-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
 .m2-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
@@ -502,10 +505,10 @@ canvas{max-width:100%;}
 
   <!-- SUB-TABS -->
   <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;">
-    <div class="tab active" data-subtab="visao" style="padding:10px 16px;font-size:11px;" onclick="switchSubtab('visao')">Visão Geral</div>
-    <div class="tab" data-subtab="categorias" style="padding:10px 16px;font-size:11px;" onclick="switchSubtab('categorias')">Por Categoria</div>
-    <div class="tab" data-subtab="alertas" style="padding:10px 16px;font-size:11px;" onclick="switchSubtab('alertas')">Alertas</div>
-    <div class="tab" data-subtab="aportes" style="padding:10px 16px;font-size:11px;" onclick="switchSubtab('aportes')">Aportes</div>
+    <div class="subtab-btn active" data-subtab="visao" onclick="switchSubtab('visao')">Visão Geral</div>
+    <div class="subtab-btn" data-subtab="categorias" onclick="switchSubtab('categorias')">Por Categoria</div>
+    <div class="subtab-btn" data-subtab="alertas" onclick="switchSubtab('alertas')">Alertas</div>
+    <div class="subtab-btn" data-subtab="aportes" onclick="switchSubtab('aportes')">Aportes</div>
   </div>
 
   <!-- VISÃO GERAL -->
@@ -1593,7 +1596,7 @@ let activeCats = new Set(CATEGORIES.slice(0, 6)); // mostra top 6 por padrão
 // ─── SUBTABS ──────────────────────────────────────────────────────────────────
 
 function switchSubtab(name) {
-  document.querySelectorAll('[data-subtab]').forEach(t => {
+  document.querySelectorAll('.subtab-btn').forEach(t => {
     t.classList.toggle('active', t.dataset.subtab === name);
   });
   document.querySelectorAll('.subview').forEach(v => {
@@ -1606,8 +1609,7 @@ function switchSubtab(name) {
 
 function renderM2(section) {
   if (!section) {
-    // Verifica qual subtab está ativa
-    const active = document.querySelector('[data-subtab].active');
+    const active = document.querySelector('.subtab-btn.active');
     section = active ? active.dataset.subtab : 'visao';
   }
   if (section === 'visao') renderVisaoGeral();
@@ -1990,7 +1992,7 @@ function deleteAporte(mKey) {
 document.getElementById('reservaInput').addEventListener('change', function() {
   localStorage.setItem('cf_reserva', this.value || '0');
   renderAportes();
-  if (document.querySelector('[data-subtab="visao"]').classList.contains('active')) renderVisaoGeral();
+  if (document.querySelector('.subtab-btn[data-subtab="visao"]') && document.querySelector('.subtab-btn[data-subtab="visao"]').classList.contains('active')) renderVisaoGeral();
 });
 
 // ─── HOOK NO RENDERALL ────────────────────────────────────────────────────────
