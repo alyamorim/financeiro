@@ -754,7 +754,7 @@ const CATEGORIES = [
   'Aluguel e Condomínio','Luz e Internet','Supermercado','Alimentação fora','Transporte','Carro',
   'Saúde','Fitness','Serviços domésticos','Lazer e cultura','Streaming','Viagens',
   'Deslocamento e hospedagem SP','Vestuário','Salão e cuidados pessoais',
-  'Tecnologia','Educação','Presentes','Doações e filantropia','Casamento','Outros'
+  'Tecnologia','Educação','Presentes','Doações e filantropia','Casamento','Pets','Outros'
 ];
 
 const ORIGEM_LABELS = { pessoal:'Gasto pessoal', conjunto:'Cartão conjunto', boleto:'Boleto da casa' };
@@ -781,6 +781,7 @@ const KW_MAP = [
   { kws:['curso','escola','faculdade','universidade','mensalidade','udemy','alura'], cat:'Educação' },
   { kws:['presente','gift'], cat:'Presentes' },
   { kws:['doacao','doação','igreja','ong '], cat:'Doações e filantropia' },
+  { kws:['pet love','petlove','petstor','patapet','bichos','pets','veterinario','veterinária','vet ','petshop','pet shop','banho e tosa'], cat:'Pets' },
   { kws:['casamento','buffet','decoracao','decoração','fotografo','fotógrafo','floricultura','convite','vestido de noiva','traje'], cat:'Casamento' },
 ];
 
@@ -1040,7 +1041,7 @@ function addTransaction() {
   for (let p = 0; p < parcelas; p++) {
     const d = new Date(y, mo - 1 + p, parseInt(date.split('-')[2]));
     const monthKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    const isRealizado = p === 0 || monthKey === currentMonth;
+    const tipoLanc = (p === 0 || monthKey === currentMonth) ? 'realizado' : 'comprometido';
     getM(monthKey).transactions.push({
       id: groupId + p,
       groupId,
@@ -1049,7 +1050,7 @@ function addTransaction() {
       cat, origem,
       valorTotal: valorParcela,
       meuValor: meuValorParcela,
-      tipo: 'realizado',
+      tipo: tipoLanc,
       parcelaNum: p+1,
       parcelaTotal: parcelas,
     });
@@ -1278,14 +1279,23 @@ function confirmImport() {
     const meuValor = r.valorTotal / divisor;
     const groupId = Date.now() + i * 1000;
 
-    // Lança o lançamento do mês atual
-    getM(currentMonth).transactions.push({
-      id: groupId, groupId: r.parcelaTotal > 1 ? groupId : null,
-      date: r.date, desc: r.desc, cat: r.cat, origem: origemPadrao,
-      valorTotal: r.valorTotal, meuValor,
+    // Lança o lançamento do mês atual — sempre como 'realizado'
+    const txAtual = {
+      id: groupId,
+      groupId: r.parcelaTotal > 1 ? groupId : null,
+      date: r.date,
+      desc: r.desc,
+      cat: r.cat,
+      origem: origemPadrao,
+      valorTotal: r.valorTotal,
+      meuValor: meuValor,
       tipo: 'realizado',
-      parcelaNum: r.parcelaAtual, parcelaTotal: r.parcelaTotal,
-    });
+      parcelaNum: r.parcelaAtual,
+      parcelaTotal: r.parcelaTotal,
+    };
+    // Garantia extra: nunca deixar tipo diferente de 'realizado' aqui
+    txAtual.tipo = 'realizado';
+    getM(currentMonth).transactions.push(txAtual);
     count++;
 
     // Projeta parcelas futuras se solicitado
